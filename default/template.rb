@@ -1,9 +1,17 @@
 require "pry-byebug"
 
-source_paths.unshift File.expand_path(File.dirname(__FILE__))
+source_paths.unshift File.expand_path(File.dirname(__FILE__)) + "/files"
 
 run "rm Gemfile"
+
+# docker
+copy_file "docker-compose.yml", "docker-compose.yml"
+copy_file "Dockerfile", "Dockerfile"
+directory "docker", "docker", resursive: true
+
 copy_file "Gemfile", "Gemfile"
+
+# remove turbolinks
 gsub_file "app/assets/javascripts/application.js",
           "\n//= require turbolinks" do |match|
             ""
@@ -32,8 +40,9 @@ after_bundle do
     "Dir[Rails"
   end
 
-  directory "files/app",    "app",    resursive: true
-  directory "files/spec",   "spec",   resursive: true
+  directory "app",    "app",    resursive: true
+  directory "config", "config", resursive: true
+  directory "spec",   "spec",   resursive: true
   # ==
 
   # seedbank
@@ -43,6 +52,4 @@ after_bundle do
   run "bundle exec rubocop -a" # your rails belongs to us
 
   git :init
-  git add: "."
-  git commit: %Q{ -m 'Initial commit' }
 end
