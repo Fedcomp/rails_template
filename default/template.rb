@@ -29,21 +29,30 @@ environment "config.autoload_paths << Rails.root.join('lib').to_s"
 route "root to: \"example#index\""
 
 after_bundle do
+  # Specified gem sqlite for database exception ...
+  run "rm config/database.yml"
+  directory "config", "config", resursive: true
+
   # == Rspec ==
   generate("rspec:install")
   generate("bootstrap:install static")
   generate("simple_form:install --bootstrap")
-  rake "haml:erb2haml"
+  # rake "haml:erb2haml"
 
   # activate eager loading of support dir
   gsub_file "spec/rails_helper.rb", "# Dir[Rails" do |match|
     "Dir[Rails"
   end
+  # uncomment spring after generators
+  gsub_file "Gemfile", "# gem \"spring\"" do |match|
+    "gem \"spring\""
+  end
 
   directory "app",    "app",    resursive: true
-  directory "config", "config", resursive: true
   directory "spec",   "spec",   resursive: true
   # ==
+
+  run "rm app/views/layouts/application.html.erb"
 
   # seedbank
   directory "seeds", "db/seeds"

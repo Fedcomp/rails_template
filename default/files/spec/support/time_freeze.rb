@@ -1,10 +1,8 @@
 # Time sensitive test
 RSpec.configure do |config|
-  config.before time: :freeze do
-    Timecop.freeze
-  end
-
-  config.after time: :freeze do
-    Timecop.return
+  config.around time: :freeze do |example|
+    travel_to Time.current do
+      example.call
+    end
   end
 end

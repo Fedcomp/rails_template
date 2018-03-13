@@ -1,13 +1,13 @@
 db:
-  image: postgres:9.6
+  image: postgres:10
   volumes:
     - /var/lib/postgresql/data
 
-web: &web
+backend: &backend
   build: .
   volumes:
     - .:/app
-    - /usr/local/bundle
+    - ./vendor/bundle:/usr/local/bundle
   links:
     - db
   ports:
@@ -15,7 +15,7 @@ web: &web
   env_file: docker/rails/development.env
 
 test:
-  <<: *web
+  <<: *backend
   command: ["bundle", "exec", "guard"]
   ports: []
   env_file: docker/rails/test.env
