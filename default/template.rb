@@ -1,64 +1,35 @@
-require "pry-byebug"
-
 source_paths.unshift File.expand_path(File.dirname(__FILE__)) + "/files"
 
+# Do not ask to overwrite
 run "rm Gemfile"
-
-# docker
-copy_file "docker-compose.yml", "docker-compose.yml"
-copy_file "Dockerfile", "Dockerfile"
-directory "docker", "docker", resursive: true
-
 copy_file "Gemfile", "Gemfile"
 
-# remove turbolinks
-gsub_file "app/assets/javascripts/application.js",
-          "\n//= require turbolinks" do |match|
-            ""
-          end
-
-run "rm README.md"
-run "rm -rf test"
-
-# StyleGuide
-copy_file ".rubocop.yml", ".rubocop.yml"
-
-# Make rails autoload lib files by default
-environment "config.autoload_paths << Rails.root.join('lib').to_s"
-
-route "root to: \"example#index\""
-
 after_bundle do
-  # Specified gem sqlite for database exception ...
+  # Fixes sqlite exception
   run "rm config/database.yml"
   directory "config", "config", resursive: true
 
-  # == Rspec ==
+  generate("simple_form:install --bootstrap")
   generate("rspec:install")
   generate("bootstrap:install static")
-  generate("simple_form:install --bootstrap")
-  # rake "haml:erb2haml"
+  gsub_file("Gemfile", "# gem \"spring\"") { |_| "gem \"spring\"" } # uncomment spring after generators finished
 
-  # activate eager loading of support dir
-  gsub_file "spec/rails_helper.rb", "# Dir[Rails" do |match|
-    "Dir[Rails"
-  end
-  # uncomment spring after generators
-  gsub_file "Gemfile", "# gem \"spring\"" do |match|
-    "gem \"spring\""
-  end
+  run "rm -rf README.md test app/views/layouts/application.html.erb"
 
-  directory "app",    "app",    resursive: true
-  directory "spec",   "spec",   resursive: true
-  # ==
+  copy_file ".rubocop.yml", ".rubocop.yml"
+  copy_file "docker-compose.yml", "docker-compose.yml"
 
-  run "rm app/views/layouts/application.html.erb"
-
-  # seedbank
+  directory "app", "app", resursive: true
+  directory "docker", "docker", resursive: true
   directory "seeds", "db/seeds"
-  run "rm db/seeds.rb"
+  directory "spec/support", "spec/support", resursive: true
+
+  gsub_file("spec/rails_helper.rb", "# Dir[Rails") { |_| "Dir[Rails" } # activate eager loading of support dir
+  gsub_file("app/assets/javascripts/application.js", "\n//= require turbolinks") { |_| "" } # remove turbolinks
+
+  environment "config.autoload_paths << Rails.root.join('lib').to_s" # Make rails autoload lib files by default
+  route "root to: \"example#index\""
 
   run "bundle exec rubocop -a" # your rails belongs to us
-
   git :init
 end
