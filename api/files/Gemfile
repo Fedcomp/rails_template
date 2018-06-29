@@ -1,0 +1,52 @@
+source "https://rubygems.org"
+
+git_source(:github) do |repo_name|
+  repo_name = "#{repo_name}/#{repo_name}" unless repo_name.include?("/")
+  "https://github.com/#{repo_name}.git"
+end
+
+ruby "2.5.1"
+
+gem "rails", "~> 5.2.0"
+gem "pg"
+gem "puma", "~> 3.7"
+
+# rails 5.2 compatibility
+# Reduces boot times through caching; required in config/boot.rb
+gem "bootsnap", ">= 1.1.0", require: false
+
+# Use Capistrano for deployment
+# gem 'capistrano-rails', group: :development
+
+group :development do
+  # gem "spring"
+  # gem "spring-watcher-listen", "~> 2.0.0"
+
+  gem "seedbank"
+
+  gem "rubocop"
+
+  gem "guard"
+  gem "guard-rspec"
+  gem "guard-bundler"
+end
+
+group :development, :test do
+  gem "pry-rails"
+  gem "pry-byebug"
+
+  # could be used in seeds
+  gem "faker"
+
+  # contain generators, and so, in both groups
+  gem "rspec-rails"
+  gem "factory_bot_rails"
+  # ==
+end
+
+group :test do
+  gem "database_cleaner"
+  gem "shoulda-matchers"
+  gem "db-query-matchers"
+  gem "webmock"
+end

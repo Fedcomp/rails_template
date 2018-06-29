@@ -1,0 +1,23 @@
+version: '3'
+services:
+  db:
+    image: postgres:10
+    volumes:
+      - /var/lib/postgresql/data
+
+  backend: &backend
+    build: docker/backend
+    volumes:
+      - .:/app
+      - ./vendor/bundle:/usr/local/bundle
+    links:
+      - db
+    ports:
+      - 3000:3000
+    env_file: docker/backend/development.env
+
+  test:
+    <<: *backend
+    command: ["bundle", "exec", "guard"]
+    ports: []
+    env_file: docker/backend/test.env
