@@ -29,4 +29,5 @@ after_bundle do
 
   run "bundle exec rubocop -a" # your rails belongs to us
   git :init
+  run "echo 'vendor/bundle' >> .gitignore"
 end
